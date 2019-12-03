@@ -5,7 +5,7 @@ pub fn solve() -> u32 {
     let mut lines = input_content.lines();
     let line_a = lines.next().unwrap();
     let line_b = lines.next().unwrap();
-    compute_distance(line_a.to_string(), line_b.to_string())
+    least_combined_steps(line_a.to_string(), line_b.to_string())
 }
 
 fn compute_distance(wire_a: String, wire_b: String) -> u32 {
@@ -19,6 +19,21 @@ fn compute_distance(wire_a: String, wire_b: String) -> u32 {
         .unwrap();
 
     min_distance
+}
+
+fn least_combined_steps(wire_a: String, wire_b: String) -> u32 {
+    let line_a: Vec<Point> = create_lines(parse_wire(wire_a));
+    let line_b: Vec<Point> = create_lines(parse_wire(wire_b));
+    let common_points = intersect(&line_a, &line_b);
+    common_points
+        .iter()
+        .map(|point| compute_steps(&line_a, point) + compute_steps(&line_b, point) + 2)
+        .min()
+        .unwrap()
+}
+
+fn compute_steps(wire: &Vec<Point>, point: &Point) -> u32 {
+    wire.iter().position(|&x| x == *point).unwrap() as u32
 }
 
 fn intersect(line: &Vec<Point>, other: &Vec<Point>) -> Vec<Point> {
@@ -207,5 +222,21 @@ mod tests {
                 Point { x: 3, y: 3 },
             ]
         )
+    }
+
+    #[test]
+    fn test_least_steps_1() {
+        let wire_a = String::from("R75,D30,R83,U83,L12,D49,R71,U7,L72");
+        let wire_b = String::from("U62,R66,U55,R34,D71,R55,D58,R83");
+        let distance = least_combined_steps(wire_a, wire_b);
+        assert_eq!(distance, 610);
+    }
+
+    #[test]
+    fn test_least_steps_2() {
+        let wire_a = String::from("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51");
+        let wire_b = String::from("U98,R91,D20,R16,D67,R40,U7,R15,U6,R7");
+        let distance = least_combined_steps(wire_a, wire_b);
+        assert_eq!(distance, 410);
     }
 }
